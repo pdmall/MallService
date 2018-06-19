@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <!-- 任务类 -->  
+<bean id="MyScheduler" class="com.yang.quartz.StockPushTask"></bean>  
+      
+<!-- 把任务类绑定给jobDetail对象 -->  
+   <bean id="jobHand" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">    
+      <property name="targetObject">    
+        <ref bean="MyScheduler"/><!-- 指定具体拦截哪个定时任务 -->    
+      </property>    
+      <property name="targetMethod">    
+        <value>test</value><!-- 指定要执行的类里面的哪个方法 -->    
+      </property>    
+    </bean>    
+  
+<!-- 计划触发器，使用 CronTriggerFactoryBean。这种类型更加灵活，允许你针对特定实例选择计划方案以及将来要执行的频率。 -->    
+    <bean id="cronTrigger"  class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">    
+        <property name="jobDetail" ref="jobHand" />    
+        <property name="cronExpression" value="0 36 19 * * ?" />   
+    </bean>    
+    
+<!-- 把任务jobDetail对象和计划触发器绑定一起，程序便会根据计划触发器的时间执行指定任务 -->  
+    <bean id="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">    
+         <property name="jobDetails">    
+            <list>     
+                <ref bean="jobHand" />    
+            </list>    
+        </property>    
+        
+        <property name="triggers">    
+            <list>    
+                <ref bean="cronTrigger" />    
+            </list>    
+        </property>   
+        <property name="configLocation" value="classpath:quartz.properties"/> 
+    </bean>      
+</beans>
